@@ -2,285 +2,64 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Windows OS 混成マインスイーパー</title>
-  <!-- 3大OSのCSSライブラリを全部読み込み！ -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>マインスイーパー - Select OS</title>
   <link rel="stylesheet" href="https://unpkg.com/98.css">
-  <link rel="stylesheet" href="https://unpkg.com/xp.css">
-  <link rel="stylesheet" href="https://unpkg.com/7.css">
   <style>
     body {
-      background-color: #008080; /* Windows 98伝統のエメラルドグリーン */
+      background-color: #008080;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
       margin: 0;
-      font-family: "Tahoma", "MS Sans Serif", sans-serif;
+      font-family: "Tahoma", sans-serif;
     }
-    .board {
-      display: grid;
-      grid-template-columns: repeat(9, 25px);
-      grid-template-rows: repeat(9, 25px);
-      gap: 0;
+    .os-card {
       background: #c0c0c0;
-      border: 3px inset #fff;
-      margin: 10px auto;
-      width: fit-content;
-    }
-    .cell {
-      width: 25px;
-      height: 25px;
-      padding: 0;
-      font-weight: bold;
-      font-size: 14px;
-      text-align: center;
-      line-height: 25px;
-      cursor: pointer;
-    }
-    .cell.open {
-      border: 1px solid #7b7b7b;
-      background: #c0c0c0;
-      box-shadow: none;
-    }
-    .header-panel {
-      background: #c0c0c0;
-      border: 2px inset #fff;
-      padding: 6px;
+      border: 2px solid #fff;
+      padding: 15px;
+      margin: 10px 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
-    }
-    .digital-counter {
-      background: black;
-      color: red;
-      font-family: monospace;
-      font-size: 20px;
-      font-weight: bold;
-      padding: 2px 6px;
-      border: 1px solid #808080;
-    }
-    /* Win7風の勝敗ダイアログ（Aeroガラスエフェクト） */
-    #win7-dialog {
-      display: none;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 100;
-      width: 260px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
     }
   </style>
 </head>
 <body>
 
-  <!-- メイン枠組み：Win98 ウインドウ -->
-  <div class="window" style="width: 280px;">
+  <div class="window" style="width: 320px;">
     <div class="title-bar">
-      <div class="title-bar-text">Minesweeper (98 x XP x 7 Edition)</div>
-      <div class="title-bar-controls">
-        <button aria-label="Minimize"></button>
-        <button aria-label="Close"></button>
-      </div>
+      <div class="title-bar-text">Boot Menu - Classic Mine</div>
     </div>
     <div class="window-body">
+      <p style="margin-top: 0;">遊ぶバージョン（OS）を選択してください：</p>
       
-      <!-- OS切り替えっぽく見せる WinXP 風タブ -->
-      <section class="tabs" style="margin-bottom: 10px;">
-        <menu role="tablist" aria-label="OS Selection">
-          <button role="tab" aria-selected="true">初級 (Win98)</button>
-          <button role="tab" aria-selected="false" onclick="alert('XP版は絶賛開発中！w')">中級 (XP)</button>
-        </menu>
-      </section>
-
-      <!-- スコア＆リセットボタン（あの顔） -->
-      <div class="header-panel">
-        <div class="digital-counter" id="mine-count">010</div>
-        <button id="face-btn" style="min-width: 30px; height: 30px; padding: 0;" onclick="initGame()">🙂</button>
-        <div class="digital-counter" id="timer">000</div>
+      <div class="os-card">
+        <div>
+          <strong>Windows 98 Edition</strong><br>
+          <small>無骨で硬派な初代UI</small>
+        </div>
+        <button onclick="location.href='win98.html'">起動</button>
       </div>
 
-      <!-- マインスイーパーの盤面 -->
-      <div id="board" class="board"></div>
+      <div class="os-card">
+        <div>
+          <strong>Windows XP Edition</strong><br>
+          <small>鮮やかな青と緑のUI</small>
+        </div>
+        <button onclick="location.href='winxp.html'">起動</button>
+      </div>
+
+      <div class="os-card">
+        <div>
+          <strong>Windows 7 Edition</strong><br>
+          <small>透明感あふれるAero UI</small>
+        </div>
+        <button onclick="location.href='win7.html'">起動</button>
+      </div>
     </div>
   </div>
 
-  <!-- ゲームオーバー/クリア時に出現する Win7 (Aero) 風ダイアログ -->
-  <div id="win7-dialog" class="window glass active">
-    <div class="title-bar">
-      <div class="title-bar-text" id="dialog-title">通知</div>
-    </div>
-    <div class="window-body" style="text-align: center;">
-      <p id="dialog-msg" style="margin: 15px 0;">メッセージ</p>
-      <button class="win7-btn" onclick="closeDialog()">もう一度遊ぶ</button>
-    </div>
-  </div>
-
-<script>
-  const BOARD_SIZE = 9;
-  const MINE_COUNT = 10;
-  let board = [];
-  let gameOver = false;
-  let timerInterval = null;
-  let time = 0;
-
-  function initGame() {
-    clearInterval(timerInterval);
-    time = 0;
-    gameOver = false;
-    document.getElementById('timer').innerText = '000';
-    document.getElementById('mine-count').innerText = '010';
-    document.getElementById('face-btn').innerText = '🙂';
-    closeDialog();
-
-    // 盤面配列の初期化
-    board = Array(BOARD_SIZE).fill(null).map(() => 
-      Array(BOARD_SIZE).fill(null).map(() => ({ mine: false, open: false, count: 0 }))
-    );
-
-    // 地雷をランダム配置
-    let placed = 0;
-    while (placed < MINE_COUNT) {
-      let r = Math.floor(Math.random() * BOARD_SIZE);
-      let c = Math.floor(Math.random() * BOARD_SIZE);
-      if (!board[r][c].mine) {
-        board[r][c].mine = true;
-        placed++;
-      }
-    }
-
-    // 周囲の地雷数を計算
-    for (let r = 0; r < BOARD_SIZE; r++) {
-      for (let c = 0; c < BOARD_SIZE; c++) {
-        if (board[r][c].mine) continue;
-        let count = 0;
-        for (let dr = -1; dr <= 1; dr++) {
-          for (let dc = -1; dc <= 1; dc++) {
-            let nr = r + dr, nc = c + dc;
-            if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
-              if (board[nr][nc].mine) count++;
-            }
-          }
-        }
-        board[r][c].count = count;
-      }
-    }
-
-    renderBoard();
-  }
-
-  function renderBoard() {
-    const boardEl = document.getElementById('board');
-    boardEl.innerHTML = '';
-
-    for (let r = 0; r < BOARD_SIZE; r++) {
-      for (let c = 0; c < BOARD_SIZE; c++) {
-        const btn = document.createElement('button');
-        btn.classList.add('cell');
-        
-        if (board[r][c].open) {
-          btn.classList.add('open');
-          if (board[r][c].mine) {
-            btn.innerText = '💣';
-            btn.style.background = 'red';
-          } else if (board[r][c].count > 0) {
-            btn.innerText = board[r][c].count;
-            // 本家の数字の色再現
-            const colors = ['', 'blue', 'green', 'red', 'darkblue', 'brown', 'cyan', 'black', 'gray'];
-            btn.style.color = colors[board[r][c].count];
-          }
-        }
-
-        btn.onclick = () => clickCell(r, c);
-        boardEl.appendChild(btn);
-      }
-    }
-  }
-
-  function startTimer() {
-    if (!timerInterval) {
-      timerInterval = setInterval(() => {
-        time++;
-        document.getElementById('timer').innerText = String(time).padStart(3, '0');
-      }, 1000);
-    }
-  }
-
-  function clickCell(r, c) {
-    if (gameOver || board[r][c].open) return;
-    startTimer();
-
-    board[r][c].open = true;
-
-    if (board[r][c].mine) {
-      // 踏んだ！ゲームオーバー
-      gameOver = true;
-      clearInterval(timerInterval);
-      document.getElementById('face-btn').innerText = '😵';
-      revealAll();
-      showWin7Dialog('ゲームオーバー', '💥 ドカン！地雷を踏みました。');
-    } else {
-      // 空白セルなら連鎖オープン
-      if (board[r][c].count === 0) {
-        openNeighbors(r, c);
-      }
-      checkWin();
-    }
-    renderBoard();
-  }
-
-  function openNeighbors(r, c) {
-    for (let dr = -1; dr <= 1; dr++) {
-      for (let dc = -1; dc <= 1; dc++) {
-        let nr = r + dr, nc = c + dc;
-        if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
-          if (!board[nr][nc].open && !board[nr][nc].mine) {
-            board[nr][nc].open = true;
-            if (board[nr][nc].count === 0) {
-              openNeighbors(nr, nc);
-            }
-          }
-        }
-      }
-    }
-  }
-
-  function revealAll() {
-    for (let r = 0; r < BOARD_SIZE; r++) {
-      for (let c = 0; c < BOARD_SIZE; c++) {
-        board[r][c].open = true;
-      }
-    }
-  }
-
-  function checkWin() {
-    let openedCount = 0;
-    for (let r = 0; r < BOARD_SIZE; r++) {
-      for (let c = 0; c < BOARD_SIZE; c++) {
-        if (board[r][c].open) openedCount++;
-      }
-    }
-    if (openedCount === (BOARD_SIZE * BOARD_SIZE) - MINE_COUNT) {
-      gameOver = true;
-      clearInterval(timerInterval);
-      document.getElementById('face-btn').innerText = '😎';
-      showWin7Dialog('クリア！', '🎉 おめでとうございます！見事に地雷を回避しました！');
-    }
-  }
-
-  function showWin7Dialog(title, msg) {
-    document.getElementById('dialog-title').innerText = title;
-    document.getElementById('dialog-msg').innerText = msg;
-    document.getElementById('win7-dialog').style.display = 'block';
-  }
-
-  function closeDialog() {
-    document.getElementById('win7-dialog').style.display = 'none';
-  }
-
-  // 初期化実行
-  initGame();
-</script>
 </body>
 </html>
