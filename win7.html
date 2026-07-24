@@ -17,7 +17,7 @@
 </head>
 <body>
 
-  <div class="window glass active" style="width: 290px;">
+  <div class="window glass active" style="width: 290px;" id="MainWindow">
     <div class="title-bar">
       <div class="title-bar-text">Minesweeper - Windows 7</div>
       <div class="title-bar-controls">
@@ -37,20 +37,29 @@
   
 　<div class="window glass active" style="width: 260px;" id="dialogBox">
     <div class="title-bar">
-      <div class="title-bar-text">Title</div>
+      <div class="title-bar-text" id="titleTxt">Title</div>
       <div class="title-bar-controls">
         <button aria-label="Close" onclick="location.href='index.html'"></button>
       </div>
     </div>
       <div class="window-body">
-        <p></p>
+        <p id="messageText"></p>
         <button class="win7-btn" style="width: 100px; margin-top: 5px;" onclick="document.getElementById('dialogBox').style.display = 'none';">OK</button>
       </div>
     </div>
 <script>
   function showDialog(title,message){
     const dialogBox = document.getElementById("dialogBox");
-    
+    const MainWindow = document.getElementById("MainWindow");
+    if (title) document.getElementById("titleTxt").innerText = title;
+    if (message) document.getElementById("messageText").innerText = message;
+    if (dialogBox) {
+      dialogBox.style.display = "none";
+      dialogBox.classList.remove('active');
+    }
+    if (MainWindow && !MainWindow.classList.contains('active')) {
+      MainWindow.classList.add('active');
+    }
   }
   const BOARD_SIZE = 9, MINE_COUNT = 10;
   let board = [], gameOver = false, timerInterval = null, time = 0, flagsPlaced = 0;
@@ -127,7 +136,8 @@
     if (board[r][c].mine) {
       gameOver = true; clearInterval(timerInterval);
       document.getElementById('face-btn').innerText = '😵';
-      alert('💥 ゲームオーバー！');
+      // alert('💥 ゲームオーバー！');
+      showDialog("マインスイーパー", "💥 ゲームオーバー！");
     } else {
       if (board[r][c].count === 0) openNeighbors(r, c);
       checkWin();
@@ -159,7 +169,8 @@
     if (openCount === (BOARD_SIZE * BOARD_SIZE) - MINE_COUNT) {
       gameOver = true; clearInterval(timerInterval);
       document.getElementById('face-btn').innerText = '😎';
-      alert('🎉 Win7 Aero版 クリア！');
+      // alert('🎉 Win7 Aero版 クリア！');
+      showDialog("You Winner!","マインスイーパーをクリアしました！本日は、当ゲームサイトに遊びに来ていただき、ありがとうございました。");
     }
   }
 
