@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minesweeper (Windows XP)</title>
+  <link rel="stylesheet" href="https://unpkg.com/xp.css">
+  <style>
+    body { background-color: #5a7edc; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; user-select: none; }
+    .board { display: grid; gap: 0; background: #ece9d8; border: 2px solid #7f9db9; margin: 10px auto; width: fit-content; }
+    .cell { width: 25px; height: 25px; padding: 0; font-weight: bold; font-size: 13px; text-align: center; line-height: 23px; cursor: pointer; box-sizing: border-box; }
+    .cell.open { border: 1px solid #aca899 !important; background: #ece9d8 !important; box-shadow: none !important; }
+    .header-panel { background: #ece9d8; border: 2px solid #7f9db9; padding: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .digital-counter { background: black; color: red; font-family: 'Courier New', monospace; font-size: 22px; font-weight: bold; padding: 0 4px; border: 1px solid #808080; min-width: 42px; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <div class="window" style="width: 290px;">
+    <div class="title-bar">
+      <div class="title-bar-text">Minesweeper - Windows XP</div>
+      <div class="title-bar-controls">
+        <button aria-label="Close" onclick="location.href='index.html'"></button>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="header-panel">
+        <div class="digital-counter" id="mine-count">010</div>
+        <button id="face-btn" style="min-width: 32px; height: 32px; padding: 0;" onclick="initGame()">🙂</button>
+        <div class="digital-counter" id="timer">000</div>
+      </div>
+      <div id="board" class="board"></div>
+      <button style="width: 100%; margin-top: 5px;" onclick="location.href='index.html'">OS選択に戻る</button>
+    </div>
+  </div>
+
+<script>
+  // ロジックはwin98と同等の標準型
+  const BOARD_SIZE = 9, MINE_COUNT = 10;
+  let board = [], gameOver = false, timerInterval = null, time = 0, flagsPlaced = 0;
+
+  function initGame() {
+    clearInterval(timerInterval); timerInterval = null; time = 0; flagsPlaced = 0; gameOver = false;
+    document.getElementById('timer').innerText = '000';
+    document.getElementById('face-btn').innerText = '🙂';
+    updateMineCount();
+
+    const boardEl = document.getElementById('board');
+    boardEl.style.gridTemplateColumns = `repeat(${BOARD_SIZE}, 25px)`;
+    boardEl.style.gridTemplateRows = `repeat(${BOARD_SIZE}, 25px)`;
+
+    board = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null).map(() => ({ mine: false, open: false, state: 'none', count: 0 })));
+
+    let placed = 0;
+    while (placed < MINE_COUNT) {
+      let r = Math.floor(Math.random() * BOARD_SIZE), c = Math.floor(Math.random() * BOARD_SIZE);
+      if (!board[r][c].mine) { board[r][c].mine = true; placed++; }
+    }
+
+    for (let r = 0; r < BOARD_SIZE; r++) {
+      for (let c = 0; c < BOARD_SIZE; c++) {
+        if (board[r][c].mine) continue;
+        let count = 0;
+        for (let dr = -1; dr <= 1; dr++) {
+          for (let dc = -1; dc <= 1; dc++) {
+            let nr = r + dr, nc = c + dc;
+            if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && board[nr][nc].mine) count++;
+          }
+        }
+        board[r][c].count = count;
+      }
+    }
+    renderBoard();
+  }
+
+  function updateMineCount() {
+    let rem = MINE_COUNT - flagsPlaced;
+    document.getElementById('mine-count').innerText = String(rem).padStart(3, '0');
+  }
+
+  function renderBoard() {
+    const boardEl = document.getElementById('board');
+    boardEl.innerHTML = '';
+    for (let r = 0; r < BOARD_SIZE; r++) {
+      for (let c = 0; c < BOARD_SIZE; c++) {
+        const btn = document.createElement('button');
+        btn.classList.add('cell');
+        const cell = board[r][c];
+        if (cell.open) {
+          btn.classList.add('open');
+          if (cell.mine) { btn.innerText = '💣'; btn.style.background = 'red'; }
+          else if (cell.count > 0) {
+            btn.innerText = cell.count;
+            const colors = ['', 'blue', 'green', 'red', 'darkblue', 'brown', 'cyan', 'black', 'gray'];
+            btn.style.color = colors[cell.count];
+          }
+        } else {
+          if (cell.state === 'flag') btn.innerText = '🚩';
+        }
+        btn.onclick = () => clickCell(r, c);
+        btn.oncontextmenu = (e) => { e.preventDefault(); toggleFlag(r, c); };
+        boardEl.appendChild(btn);
+      }
+    }
+  }
+
+  function clickCell(r, c) {
+    if (gameOver || board[r][c].open || board[r][c].state === 'flag') return;
+    if (!timerInterval) timerInterval = setInterval(() => { time++; document.getElementById('timer').innerText = String(time).padStart(3, '0'); }, 1000);
+    board[r][c].open = true;
+    if (board[r][c].mine) {
+      gameOver = true; clearInterval(timerInterval);
+      document.getElementById('face-btn').innerText = '😵';
+      alert('💥 ゲームオーバー！');
+    } else {
+      if (board[r][c].count === 0) openNeighbors(r, c);
+      checkWin();
+    }
+    renderBoard();
+  }
+
+  function toggleFlag(r, c) {
+    if (gameOver || board[r][c].open) return;
+    board[r][c].state = board[r][c].state === 'none' ? 'flag' : 'none';
+    flagsPlaced += board[r][c].state === 'flag' ? 1 : -1;
+    updateMineCount(); renderBoard();
+  }
+
+  function openNeighbors(r, c) {
+    for (let dr = -1; dr <= 1; dr++) {
+      for (let dc = -1; dc <= 1; dc++) {
+        let nr = r + dr, nc = c + dc;
+        if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && !board[nr][nc].open && !board[nr][nc].mine) {
+          board[nr][nc].open = true;
+          if (board[nr][nc].count === 0) openNeighbors(nr, nc);
+        }
+      }
+    }
+  }
+
+  function checkWin() {
+    let openCount = board.flat().filter(c => c.open).length;
+    if (openCount === (BOARD_SIZE * BOARD_SIZE) - MINE_COUNT) {
+      gameOver = true; clearInterval(timerInterval);
+      document.getElementById('face-btn').innerText = '😎';
+      alert('🎉 XP版 クリア！');
+    }
+  }
+
+  initGame();
+</script>
+</body>
+</html>
