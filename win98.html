@@ -137,6 +137,7 @@
       gameOver = true; clearInterval(timerInterval);
       document.getElementById('face-btn').innerText = '😵';
       // alert('💥 ゲームオーバー！');
+      showDialog("マインスイーパー", "💥 ゲームオーバー！");
     } else {
       if (board[r][c].count === 0) openNeighbors(r, c);
       checkWin();
