@@ -169,7 +169,8 @@
     if (openCount === (BOARD_SIZE * BOARD_SIZE) - MINE_COUNT) {
       gameOver = true; clearInterval(timerInterval);
       document.getElementById('face-btn').innerText = '😎';
-      alert('🎉 Win98版 クリア！');
+      // alert('🎉 Win98版 クリア！');
+      showDialog("You Winner!","マインスイーパーをクリアしました！本日は、当ゲームサイトに遊びに来ていただき、ありがとうございました。");
     }
   }
 
