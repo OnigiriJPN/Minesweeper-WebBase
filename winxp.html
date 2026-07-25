@@ -177,5 +177,20 @@
 
   initGame();
 </script>
+  <script>
+   if ('serviceWorker' in navigator) {
+     window.addEventListener('load', () => {
+       navigator.serviceWorker.register('/sw.js')
+       .then((registration) => {
+         console.log("[Debug] サービスワーカーを登録しました。");
+       })
+       .catch((error) => {
+         throw new Error("[Debug] サービスワーカーの登録に失敗しました: ", error.message);
+       });
+     });
+   } else {
+     throw new Error("お使いのデバイスは、サービスワーカーをサポートされていません。");
+   }
+ </script>
 </body>
 </html>
