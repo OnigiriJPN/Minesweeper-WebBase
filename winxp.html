@@ -46,6 +46,19 @@
       </div>
     </div>
 <script>
+  function showDialog(title,message){
+    const dialogBox = document.getElementById("dialogBox");
+    const MainWindow = document.getElementById("MainWindow");
+    if (title) document.getElementById("titleTxt").innerText = title;
+    if (message) document.getElementById("messageText").innerText = message;
+    if (dialogBox) {
+      dialogBox.style.display = "block";
+      // dialogBox.classList.add('active');
+    }
+    /*if (MainWindow && !MainWindow.classList.contains('active')) {
+      MainWindow.classList.remove('active');
+    }*/
+  }
   // ロジックはwin98と同等の標準型
   const BOARD_SIZE = 9, MINE_COUNT = 10;
   let board = [], gameOver = false, timerInterval = null, time = 0, flagsPlaced = 0;
