@@ -11,5 +11,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(PRECACHE_URLS);
-    }).catch((e) => {});
+    }).catch((e) => {
+      throw new Error("エラー:" + e.message);
+    });
 });
