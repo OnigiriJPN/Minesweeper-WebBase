@@ -33,7 +33,19 @@
       <button style="width: 100%; margin-top: 5px;" onclick="location.href='index.html'">OS選択に戻る</button>
     </div>
   </div>
-
+<div class="window" style="width: 260px;" id="dialogBox">
+    <div class="title-bar">
+      <div class="title-bar-text" id="titleTxt">Title</div>
+      <div class="title-bar-controls">
+        <button aria-label="Close" onclick="location.href='index.html'"></button>
+      </div>
+    </div>
+      <div class="window-body">
+        <p id="messageText"></p>
+        <button id="ok-btn" style="width: 100px; margin-top: 5px;" onclick="document.getElementById('dialogBox').style.display = 'none';">OK</button>
+      </div>
+    </div>
+<script>
 <script>
   const BOARD_SIZE = 9, MINE_COUNT = 10;
   let board = [], gameOver = false, timerInterval = null, time = 0, flagsPlaced = 0;
