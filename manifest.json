@@ -1,0 +1,22 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "classic-mine.vercel",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "short_name": "classic-mine.vercel",
+  "start_url": "/",
+  "theme_color": "#ffffff",
+  "description": "クラシカルMinesweepers",
+  "lang": "ja",
+  "display_override": [
+    "window-controls-overlay"
+  ],
+  "categories": [
+    "entertainment",
+    "games",
+    "productivity",
+    "utilities"
+  ]
+}
